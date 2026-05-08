@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ai-frontend/ai-frontend.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+</Solution>
