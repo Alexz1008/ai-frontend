@@ -13,6 +13,12 @@ function getApiUrl() {
 }
 
 async function getAccessToken() {
+  // Use pre-supplied token from parent app (embedded iframe/script scenario)
+  const externalToken = window.__AI_CHAT_CONFIG__?.token;
+  if (externalToken) {
+    return externalToken;
+  }
+
   const accounts = msalInstance.getAllAccounts();
   if (accounts.length === 0) {
     const response = await msalInstance.loginPopup(loginRequest);
