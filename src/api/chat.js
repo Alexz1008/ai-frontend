@@ -1,4 +1,5 @@
-import { loginRequest, msalInstance } from '../auth/authConfig.js';
+import { getLoginRequest, msalInstance } from '../auth/authConfig.js';
+import { getConfig } from '../config.js';
 
 // TODO: Remove hardcoded URL before production
 const HARDCODED_API_URL = '';
@@ -7,7 +8,7 @@ function getApiUrl() {
   return (
     HARDCODED_API_URL ||
     window.__AI_CHAT_CONFIG__?.apiUrl ||
-    import.meta.env.VITE_API_URL ||
+    getConfig('API_URL') ||
     '/api/chat'
   );
 }
@@ -21,13 +22,13 @@ async function getAccessToken() {
 
   const accounts = msalInstance.getAllAccounts();
   if (accounts.length === 0) {
-    const response = await msalInstance.loginPopup(loginRequest);
+    const response = await msalInstance.loginPopup(getLoginRequest());
     return response.accessToken;
   }
   const response = await msalInstance.acquireTokenSilent({
-    ...loginRequest,
+    ...getLoginRequest(),
     account: accounts[0],
-  }).catch(() => msalInstance.acquireTokenPopup(loginRequest));
+  }).catch(() => msalInstance.acquireTokenPopup(getLoginRequest()));
   return response.accessToken;
 }
 
