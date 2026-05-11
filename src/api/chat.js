@@ -1,3 +1,5 @@
+import { loginRequest, msalInstance } from '../auth/authConfig.js';
+
 // TODO: Remove hardcoded URL before production
 const HARDCODED_API_URL = '';
 
@@ -10,15 +12,34 @@ function getApiUrl() {
   );
 }
 
+async function getAccessToken() {
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length === 0) {
+    const response = await msalInstance.loginPopup(loginRequest);
+    return response.accessToken;
+  }
+  const response = await msalInstance.acquireTokenSilent({
+    ...loginRequest,
+    account: accounts[0],
+  }).catch(() => msalInstance.acquireTokenPopup(loginRequest));
+  return response.accessToken;
+}
+
 export function streamChat(messages, { onToken, onDone, onError, signal }) {
   const url = getApiUrl();
 
-  fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages }),
-    signal,
-  })
+  getAccessToken()
+    .then((token) =>
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ messages }),
+        signal,
+      })
+    )
     .then(async (res) => {
       if (!res.ok) {
         const text = await res.text().catch(() => res.statusText);
