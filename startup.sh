@@ -14,3 +14,6 @@ cat <<EOF > "$CONFIG_PATH"
 EOF
 
 echo "config.json written to $CONFIG_PATH"
+
+# Serve the SPA with a simple static file server
+npx serve /home/site/wwwroot --single --listen ${PORT:-8080}
