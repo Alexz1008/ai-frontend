@@ -22,13 +22,14 @@ async function getAccessToken() {
 
   const accounts = msalInstance.getAllAccounts();
   if (accounts.length === 0) {
-    const response = await msalInstance.loginPopup(getLoginRequest());
-    return response.accessToken;
+    // No account — redirect to login (page will reload after auth)
+    await msalInstance.loginRedirect(getLoginRequest());
+    return null;
   }
   const response = await msalInstance.acquireTokenSilent({
     ...getLoginRequest(),
     account: accounts[0],
-  }).catch(() => msalInstance.acquireTokenPopup(getLoginRequest()));
+  }).catch(() => msalInstance.acquireTokenRedirect(getLoginRequest()));
   return response.accessToken;
 }
 

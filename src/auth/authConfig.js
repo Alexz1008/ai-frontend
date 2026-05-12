@@ -7,6 +7,10 @@ function createMsalConfig() {
       clientId: getConfig('ENTRA_CLIENT_ID'),
       authority: `https://login.microsoftonline.com/${getConfig('ENTRA_TENANT_ID')}`,
       redirectUri: window.location.origin,
+      navigateToLoginRequestUrl: true,
+    },
+    cache: {
+      cacheLocation: 'sessionStorage',
     },
   };
 }
