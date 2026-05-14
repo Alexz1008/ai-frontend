@@ -3,7 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import { getLoginRequest, initializeMsal } from './auth/authConfig.js';
-import { loadConfig } from './config.js';
+import { isAuthEnabled, loadConfig } from './config.js';
 import './index.css';
 
 // Allow runtime config via URL params (useful when embedded via iframe)
@@ -15,26 +15,37 @@ if (apiUrl) {
 
 // Load runtime config before initializing MSAL
 await loadConfig();
-const msalInstance = initializeMsal();
-await msalInstance.initialize();
 
-// Handle returning redirect (no-op if user didn't just redirect back)
-await msalInstance.handleRedirectPromise();
+let msalInstance = null;
 
-// Attempt silent SSO if no account is cached
-if (msalInstance.getAllAccounts().length === 0) {
-  try {
-    await msalInstance.ssoSilent(getLoginRequest());
-  } catch {
-    // No existing session — redirect to login
-    await msalInstance.loginRedirect(getLoginRequest());
+if (isAuthEnabled()) {
+  msalInstance = initializeMsal();
+  await msalInstance.initialize();
+
+  // Handle returning redirect (no-op if user didn't just redirect back)
+  await msalInstance.handleRedirectPromise();
+
+  // Attempt silent SSO if no account is cached
+  if (msalInstance.getAllAccounts().length === 0) {
+    try {
+      await msalInstance.ssoSilent(getLoginRequest());
+    } catch {
+      // No existing session — redirect to login
+      await msalInstance.loginRedirect(getLoginRequest());
+    }
   }
 }
 
+const appElement = msalInstance ? (
+  <MsalProvider instance={msalInstance}>
+    <App />
+  </MsalProvider>
+) : (
+  <App />
+);
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <MsalProvider instance={msalInstance}>
-      <App />
-    </MsalProvider>
+    {appElement}
   </StrictMode>,
 )

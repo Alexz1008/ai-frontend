@@ -1,5 +1,5 @@
 import { getLoginRequest, msalInstance } from '../auth/authConfig.js';
-import { getConfig } from '../config.js';
+import { getConfig, isAuthEnabled } from '../config.js';
 
 // TODO: Remove hardcoded URL before production
 const HARDCODED_API_URL = '';
@@ -18,6 +18,11 @@ async function getAccessToken() {
   const externalToken = window.__AI_CHAT_CONFIG__?.token;
   if (externalToken) {
     return externalToken;
+  }
+
+  // Skip auth when Entra is not configured
+  if (!isAuthEnabled()) {
+    return null;
   }
 
   const accounts = msalInstance.getAllAccounts();
@@ -42,7 +47,7 @@ export function streamChat(messages, { onToken, onDone, onError, signal }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({ messages }),
         signal,

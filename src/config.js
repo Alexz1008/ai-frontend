@@ -12,3 +12,7 @@ export async function loadConfig() {
 export function getConfig(key) {
   return config[key] || import.meta.env[`VITE_${key}`] || '';
 }
+
+export function isAuthEnabled() {
+  return Boolean(getConfig('ENTRA_CLIENT_ID') && getConfig('ENTRA_TENANT_ID'));
+}
