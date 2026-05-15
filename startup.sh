@@ -8,8 +8,10 @@ cat <<EOF > "$CONFIG_PATH"
 {
   "ENTRA_CLIENT_ID": "${ENTRA_CLIENT_ID}",
   "ENTRA_TENANT_ID": "${ENTRA_TENANT_ID}",
-  "ENTRA_API_SCOPE": "${ENTRA_API_SCOPE}",
-  "API_URL": "${API_URL}"
+  "ENTRA_API_SCOPE": "${ENTRA_API_SCOPE:-https://ai.azure.com/.default}",
+  "API_URL": "${API_URL}",
+  "AGENT_NAME": "${AGENT_NAME:-EBCChatbot}",
+  "AGENT_VERSION": "${AGENT_VERSION:-8}"
 }
 EOF
 

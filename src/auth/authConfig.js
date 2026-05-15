@@ -17,7 +17,7 @@ function createMsalConfig() {
 
 export function getLoginRequest() {
   return {
-    scopes: [getConfig('ENTRA_API_SCOPE') || 'api://<your-api-client-id>/.default'],
+    scopes: [getConfig('ENTRA_API_SCOPE') || 'https://ai.azure.com/.default'],
   };
 }
 
