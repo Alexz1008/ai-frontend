@@ -3,8 +3,15 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import { getLoginRequest, initializeMsal } from './auth/authConfig.js';
-import { loadConfig } from './config.js';
+import { getConfig, loadConfig } from './config.js';
 import './index.css';
+
+function shouldSkipEntraAuth() {
+  const flag = (getConfig('SKIP_LOCAL_ENTRA') || '').toLowerCase();
+  if (flag === 'true') return true;
+  if (flag === 'false') return false;
+  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+}
 
 // Allow runtime config via URL params (useful when embedded via iframe)
 const params = new URLSearchParams(window.location.search);
@@ -15,26 +22,34 @@ if (apiUrl) {
 
 // Load runtime config before initializing MSAL
 await loadConfig();
-const msalInstance = initializeMsal();
-await msalInstance.initialize();
-
-// Handle returning redirect (no-op if user didn't just redirect back)
-await msalInstance.handleRedirectPromise();
-
-// Attempt silent SSO if no account is cached
-if (msalInstance.getAllAccounts().length === 0) {
-  try {
-    await msalInstance.ssoSilent(getLoginRequest());
-  } catch {
-    // No existing session — redirect to login
-    await msalInstance.loginRedirect(getLoginRequest());
-  }
-}
-
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <MsalProvider instance={msalInstance}>
+if (shouldSkipEntraAuth()) {
+  createRoot(document.getElementById('root')).render(
+    <StrictMode>
       <App />
-    </MsalProvider>
-  </StrictMode>,
-)
+    </StrictMode>,
+  );
+} else {
+  const msalInstance = initializeMsal();
+  await msalInstance.initialize();
+
+  // Handle returning redirect (no-op if user didn't just redirect back)
+  await msalInstance.handleRedirectPromise();
+
+  // Attempt silent SSO if no account is cached
+  if (msalInstance.getAllAccounts().length === 0) {
+    try {
+      await msalInstance.ssoSilent(getLoginRequest());
+    } catch {
+      // No existing session — redirect to login
+      await msalInstance.loginRedirect(getLoginRequest());
+    }
+  }
+
+  createRoot(document.getElementById('root')).render(
+    <StrictMode>
+      <MsalProvider instance={msalInstance}>
+        <App />
+      </MsalProvider>
+    </StrictMode>,
+  );
+}

@@ -4,6 +4,13 @@ import { getConfig } from '../config.js';
 // TODO: Remove hardcoded URL before production
 const HARDCODED_API_URL = '';
 
+function shouldSkipEntraAuth() {
+  const flag = (getConfig('SKIP_LOCAL_ENTRA') || '').toLowerCase();
+  if (flag === 'true') return true;
+  if (flag === 'false') return false;
+  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+}
+
 function getApiUrl() {
   return (
     HARDCODED_API_URL ||
@@ -18,6 +25,10 @@ async function getAccessToken() {
   const externalToken = window.__AI_CHAT_CONFIG__?.token;
   if (externalToken) {
     return externalToken;
+  }
+
+  if (shouldSkipEntraAuth()) {
+    return null;
   }
 
   const accounts = msalInstance.getAllAccounts();
@@ -37,13 +48,18 @@ export function streamChat(messages, { onToken, onDone, onError, signal }) {
   const url = getApiUrl();
 
   getAccessToken()
-    .then((token) =>
+    .then((token) => {
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      return (
       fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers,
         body: JSON.stringify({
           input: messages.map((m) => ({ role: m.role, content: m.content })),
           agent_reference: {
@@ -54,7 +70,8 @@ export function streamChat(messages, { onToken, onDone, onError, signal }) {
         }),
         signal,
       })
-    )
+      );
+    })
     .then(async (res) => {
       if (!res.ok) {
         const text = await res.text().catch(() => res.statusText);

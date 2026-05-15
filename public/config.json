@@ -2,7 +2,7 @@
   "ENTRA_CLIENT_ID": "",
   "ENTRA_TENANT_ID": "",
   "ENTRA_API_SCOPE": "https://ai.azure.com/.default",
-  "API_URL": "https://beathechatassistant.services.ai.azure.com/api/projects/proj-ebcchatbot/openai/responses?api-version=2025-05-15-preview",
-  "AGENT_NAME": "EBCChatbot",
-  "AGENT_VERSION": "8"
+  "API_URL": "",
+  "AGENT_NAME": "",
+  "AGENT_VERSION": ""
 }
