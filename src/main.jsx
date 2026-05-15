@@ -10,7 +10,17 @@ function shouldSkipEntraAuth() {
   const flag = (getConfig('SKIP_LOCAL_ENTRA') || '').toLowerCase();
   if (flag === 'true') return true;
   if (flag === 'false') return false;
-  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  return false;
+}
+
+function hasManualAccessToken() {
+  const tokenFromEmbed = window.__AI_CHAT_CONFIG__?.token || '';
+  const tokenFromConfig = getConfig('DEV_ACCESS_TOKEN') || '';
+  const tokenFromStorage =
+    window.sessionStorage.getItem('DEV_ACCESS_TOKEN') ||
+    window.localStorage.getItem('DEV_ACCESS_TOKEN') ||
+    '';
+  return Boolean(tokenFromEmbed || tokenFromConfig || tokenFromStorage);
 }
 
 // Allow runtime config via URL params (useful when embedded via iframe)
@@ -22,7 +32,7 @@ if (apiUrl) {
 
 // Load runtime config before initializing MSAL
 await loadConfig();
-if (shouldSkipEntraAuth()) {
+if (shouldSkipEntraAuth() || hasManualAccessToken()) {
   createRoot(document.getElementById('root')).render(
     <StrictMode>
       <App />

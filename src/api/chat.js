@@ -8,7 +8,19 @@ function shouldSkipEntraAuth() {
   const flag = (getConfig('SKIP_LOCAL_ENTRA') || '').toLowerCase();
   if (flag === 'true') return true;
   if (flag === 'false') return false;
-  return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  return false;
+}
+
+function getManualAccessToken() {
+  const tokenFromEmbed = window.__AI_CHAT_CONFIG__?.token || '';
+  const tokenFromConfig = getConfig('DEV_ACCESS_TOKEN') || '';
+  const tokenFromStorage =
+    window.sessionStorage.getItem('DEV_ACCESS_TOKEN') ||
+    window.localStorage.getItem('DEV_ACCESS_TOKEN') ||
+    '';
+  const raw = tokenFromEmbed || tokenFromConfig || tokenFromStorage;
+  if (!raw) return null;
+  return raw.startsWith('Bearer ') ? raw.slice('Bearer '.length) : raw;
 }
 
 function getApiUrl() {
@@ -20,11 +32,33 @@ function getApiUrl() {
   );
 }
 
+function extractAssistantText(data) {
+  if (typeof data?.output_text === 'string' && data.output_text.trim()) {
+    return data.output_text;
+  }
+
+  const message = (data?.output || []).find(
+    (item) => item?.type === 'message' && item?.role === 'assistant',
+  );
+  const parts = message?.content || [];
+  const text = parts
+    .filter((part) => part?.type === 'output_text' && typeof part?.text === 'string')
+    .map((part) => part.text)
+    .join('')
+    .trim();
+
+  if (text) {
+    return text;
+  }
+
+  return '';
+}
+
 async function getAccessToken() {
-  // Use pre-supplied token from parent app (embedded iframe/script scenario)
-  const externalToken = window.__AI_CHAT_CONFIG__?.token;
-  if (externalToken) {
-    return externalToken;
+  // Temporary manual override for local debugging.
+  const manualToken = getManualAccessToken();
+  if (manualToken) {
+    return manualToken;
   }
 
   if (shouldSkipEntraAuth()) {
@@ -79,7 +113,7 @@ export function streamChat(messages, { onToken, onDone, onError, signal }) {
       }
 
       const contentType = res.headers.get('content-type') || '';
-      if (contentType.includes('text/event-stream') || res.body?.getReader) {
+      if (contentType.includes('text/event-stream')) {
         // Streaming response (SSE / chunked)
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
@@ -93,8 +127,10 @@ export function streamChat(messages, { onToken, onDone, onError, signal }) {
       } else {
         // JSON response (Responses API)
         const data = await res.json();
-        const text = data.output_text || JSON.stringify(data);
-        onToken(text);
+        const text = extractAssistantText(data);
+        if (text) {
+          onToken(text);
+        }
       }
 
       onDone();

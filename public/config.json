@@ -1,7 +1,8 @@
 {
   "ENTRA_CLIENT_ID": "",
   "ENTRA_TENANT_ID": "",
-  "ENTRA_API_SCOPE": "https://ai.azure.com/.default",
+  "ENTRA_API_SCOPE": "",
+  "DEV_ACCESS_TOKEN": "",
   "API_URL": "",
   "AGENT_NAME": "",
   "AGENT_VERSION": ""

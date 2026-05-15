@@ -69,7 +69,17 @@ export default function ChatWindow() {
           <div className="chat-empty">Send a message to start chatting.</div>
         )}
         {messages.map((msg, i) => (
-          <ChatMessage key={i} role={msg.role} content={msg.content} />
+          <ChatMessage
+            key={i}
+            role={msg.role}
+            content={msg.content}
+            isLoading={
+              isStreaming &&
+              i === messages.length - 1 &&
+              msg.role === 'assistant' &&
+              !msg.content
+            }
+          />
         ))}
         <div ref={bottomRef} />
       </div>
