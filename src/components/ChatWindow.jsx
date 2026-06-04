@@ -17,6 +17,12 @@ import ChatInput from './ChatInput';
 import ChatMessage from './ChatMessage';
 
 export default function ChatWindow() {
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = window.localStorage.getItem('THEME_MODE');
+    if (saved === 'dark') return true;
+    if (saved === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
   const [messages, setMessages] = useState([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [conversationId, setConversationId] = useState(null);
@@ -36,6 +42,12 @@ export default function ChatWindow() {
   useEffect(() => {
     apiConvIdRef.current = apiConvId;
   }, [apiConvId]);
+
+  useEffect(() => {
+    const theme = darkMode ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    window.localStorage.setItem('THEME_MODE', theme);
+  }, [darkMode]);
 
   const refreshList = useCallback(() => {
     setConversations(getConversations());
@@ -223,6 +235,14 @@ export default function ChatWindow() {
             title="Toggle chat history"
           >
             ☰
+          </button>
+          <button
+            className="theme-toggle"
+            onClick={() => setDarkMode((v) => !v)}
+            title={darkMode ? 'Switch to day mode' : 'Switch to night mode'}
+            aria-label={darkMode ? 'Switch to day mode' : 'Switch to night mode'}
+          >
+            {darkMode ? '☀️' : '🌙'}
           </button>
         </div>
         <div className="chat-messages">
