@@ -1,5 +1,5 @@
 trigger:
-- master
+- main
 
 steps:
 - task: CmdLine@2
