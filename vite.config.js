@@ -20,4 +20,8 @@ export default defineConfig({
     build: {
         target: 'esnext',
     },
+    test: {
+        environment: 'jsdom',
+        globals: true,
+    },
 })
