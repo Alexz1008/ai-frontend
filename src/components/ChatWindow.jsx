@@ -23,10 +23,20 @@ export default function ChatWindow() {
   const [apiConvId, setApiConvId] = useState(null);
   const [conversations, setConversations] = useState(() => getConversations());
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState(
+    () =>
+      localStorage.getItem('theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
+  );
   const abortRef = useRef(null);
   const bottomRef = useRef(null);
   const convIdRef = useRef(null);
   const apiConvIdRef = useRef(null);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   // Keep refs in sync so streaming callbacks see latest values
   useEffect(() => {
@@ -220,9 +230,18 @@ export default function ChatWindow() {
           <button
             className="sidebar-toggle"
             onClick={() => setSidebarOpen((o) => !o)}
+            aria-label="Toggle chat history"
             title="Toggle chat history"
           >
             ☰
+          </button>
+          <button
+            className="theme-toggle"
+            onClick={() => setTheme((current) => (current === 'light' ? 'dark' : 'light'))}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? '☾' : '☀'}
           </button>
         </div>
         <div className="chat-messages">
