@@ -24,27 +24,26 @@
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, 'Courier New', monospace;
 
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111827;
-    --bg-secondary: #1f2937;
-    --text: #f3f4f6;
-    --text-muted: #9ca3af;
-    --accent: #3b82f6;
-    --accent-hover: #60a5fa;
-    --user-bubble: #3b82f6;
-    --user-text: #ffffff;
-    --assistant-bubble: #1f2937;
-    --assistant-text: #f3f4f6;
-    --border: #374151;
-    --code-bg: #1e293b;
-    --code-border: #334155;
-    --input-bg: #1f2937;
-    --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  }
+:root[data-theme='dark'] {
+  --bg: #111827;
+  --bg-secondary: #1f2937;
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --user-bubble: #3b82f6;
+  --user-text: #ffffff;
+  --assistant-bubble: #1f2937;
+  --assistant-text: #f3f4f6;
+  --border: #374151;
+  --code-bg: #1e293b;
+  --code-border: #334155;
+  --input-bg: #1f2937;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
 }
 
 html,
